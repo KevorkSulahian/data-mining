@@ -47,3 +47,31 @@ ggplot(mtcars, aes(x = hp, y = mpg))+ geom_point() +
   geom_segment(aes(xend = hp, yend = fitted(mod3)), alpha = .2, col='red') +
   geom_point() + geom_point(aes(y=fitted(mod3)), shape  = 1)
 
+
+seriea <- read.csv("Linear Regression/seriea.csv")
+sapply(seriea, class)
+
+model1 <- lm(G~POS, data = seriea)
+summary(model1)
+
+F <- mean(seriea$G[seriea$POS == "F"])
+D <- mean(seriea$G[seriea$POS == "D"])
+M <- mean(seriea$G[seriea$POS == "M"])
+
+F
+D
+M
+
+ggplot(seriea, aes(x = SH, y = G)) + geom_point()
+
+model2 <- lm(G~POS+SH, data = seriea)
+summary(model2)
+
+model3 <- lm(G~POS + ST, data =seriea)
+summary(model3)
+
+model4 <- lm( G~POS+ ST+ SH, data = seriea)
+summary(model4)
+
+coef(model2)
+coef(model4)
