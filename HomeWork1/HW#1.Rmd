@@ -1,0 +1,143 @@
+---
+title: "Homework 1"
+author: "Kevork Sulahian"
+date: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
+```
+
+
+## Read the dataset movies3.csv into R 
+
+```{r}
+movies = read.csv("movies3.csv")
+```
+
+## The variable gross_adjusted is showing gross box office of the movie adjusted by inflation. The variable budget_adjusted shows the budget of the movie adjusted by inflation
+
+Write a code that will make variables gross_adjusted and budget_adjusted in 1000 USD.
+Dont create new variable, just overwrite the old ones. (1 point)
+
+```{r}
+gross <- paste0(movies$gross_adjusted, " USD")
+budget <-paste0(movies$budget_adjusted, " USD")
+```
+
+
+What is the minimum for box office ?
+What is the minimum for budget ? (1 point)
+
+```{r}
+movies[movies$gross ==min(movies$gross),]
+movies[movies$budget == min(movies$budget),]
+```
+
+The variable genre_first is showing which genre was mentioned first on the movies imdb webpage
+
+How many Action movies are there?
+How many comedies ? (2 point)
+
+```{r}
+tb <- table(movies$genre_first)
+
+# 721 Action
+# 844 Comedy
+```
+
+
+Create a new dataframe with the most popular geners. Take those movies only, whose genre appear in the dataframe more than 100 times.(3 points)
+
+Hint
+Suppose you want to subset the mtcars dataset in a way that will have only cars who has 6 or 8 cylinder. One way to go with it is the following:
+df <- mtcars[mtcars$cyl == 6 | mtcars$cyl ==8,]
+
+However the most efficient way will be:
+df <- mtcars[mtcars$cyl %in% c(6,8),]
+
+
+```{r}
+library(dplyr)
+tb_names <- names(tb[tb >100])
+top_movies <- filter(movies, genre_first %in% tb_names)
+head(top_movies)
+```
+
+what is the standard deviation of the imdbRating.(2 points)
+Hint. If you are getting NA after running the function, one reason can be that the variable has NA inside. Look at the help of the function, specifically for the argument na.rm 
+
+```{r}
+sd(movies$imdbRating, na.rm = TRUE)
+```
+
+On average, which gener has made the highest box office revenue ? (5 points)
+
+Hint: use function ?aggregate (https://goo.gl/DUyftz) or anything else, but dont give me lenghty code
+
+```{r}
+a <-aggregate(top_movies, by = list(top_movies$genre_first), FUN = 'mean', drop = TRUE, simplify = TRUE)
+a <- a[c("Group.1","gross_adjusted")]
+a
+```
+
+Using ggplot construct scatterplot between imdbRating and Metascore. (3 points)
+
+
+```{r}
+library(ggplot2)
+attach(top_movies)
+ggplot(top_movies, aes(x = imdbRating, y = Metascore)) + geom_point() + ggtitle("scatterplot between imdbRating and Metascore")
+  
+```
+
+Do the same thing for each genre (using facet_grid() or facet_wrap()) (3 points)
+
+```{r}
+ggplot(top_movies, aes(x = imdbRating, y = Metascore)) + geom_point() + ggtitle("scatterplot between imdbRating and Metascore") + facet_grid(.~genre_first)
+
+```
+
+Construct histogram for imdbRating for each genre (3 point)
+
+```{r}
+ggplot(top_movies, aes(x = genre_first, y = imdbRating, fill = genre_first)) + geom_histogram(stat = "identity") +
+  ggtitle("Histogram for IMDB rating for each genre")
+```
+
+Calculate mean, median and standard deviation of imdbRating and Metascore for each genre.(4 points)
+
+```{r}
+mean(imdbRating, na.rm = T)
+median(imdbRating, na.rm = T)
+sd(imdbRating, na.rm = T)
+
+mean(Metascore, na.rm = T)
+median(Metascore, na.rm = T)
+sd(Metascore, na.rm = T)
+```
+
+Based on the previous 3 questions, describe your findings in one paragraph.(5 poits)
+
+### the Mean and Median is higher in IMDB while Standard Deviation
+
+Create a binary variable based on the column OscarWon taking the valu 1, if the film got an Oscar and 0 if it does not. You can use ifelse for this.(3 points)
+```{r}
+top_movies$binary_var = ifelse(OscarWon > 0, 1, 0)
+```
+
+Write a code to see what genre films have the highest probability of being awarded Oscar(2 points)
+```{r}
+a <- top_movies %>% group_by(genre_first) %>% summarise(won = sum(binary_var))
+a[order(-a$won),] 
+
+```
+
+use visualization to illustrate the difference in means of budgets of films winning Oscar with those not winning one.(3 points)
+
+```{r}
+a <- top_movies %>% group_by(binary_var) %>% summarise(means = mean(gross_adjusted))
+ggplot(a, aes(x = a$binary_var,y = a$means, fill = a$binary_var)) + geom_histogram(stat= "identity") +
+  labs(x = "No Oscar vs at least 1 Oscar", y = "Budget", title = "Budget on oscar winning movies")
+```
