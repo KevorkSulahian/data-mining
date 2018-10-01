@@ -117,3 +117,26 @@ ggplot(marriage, aes(x = Year, y = Happy)) +geom_point() + ylim(c(6,8)) +
 
 mar9 <- lm(Happy ~ poly(Year, 9), data = marriage)
 summary(mar9)
+
+## Model selection in practice
+
+library(MASS)
+data("Boston")
+set.seed(1)
+sample <- sample(nrow(Boston), floor(nrow(Boston) * 0.7))
+sample[1:5]
+
+length(sample)
+
+train <- Boston[sample,]
+test <- Boston[-sample,]
+
+model <- lm(medv~., train)
+
+
+pred1 <- predict(model, newdata = test)
+pred1[1:10]
+
+sqrt(mean((test$medv- pred1)^2))
+
+
