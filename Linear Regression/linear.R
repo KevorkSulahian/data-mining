@@ -75,3 +75,45 @@ summary(model4)
 
 coef(model2)
 coef(model4)
+
+cor(seriea$SH, seriea$ST)
+
+ggplot(seriea, aes(x = SH, y = ST))+ geom_point()
+
+marriage <- data.frame(Happy = c(7.8, 7.6, 7.4, 7.6, 7.65, 7.4, 7.35, 7.3, 7.4, 7.5),
+                       Year = 1:10)
+
+ggplot(marriage, aes(x = Year, y = Happy)) +geom_point() + ylim(c(6,8)) + 
+  scale_x_continuous(breaks = 1:10) + labs(x = "Years", y = "Happinesss") +
+  geom_smooth(method = 'lm', se = FALSE)
+
+mar1 <- lm(Happy~Year, data = marriage)
+summary(mar1)
+
+mar2 <- lm(Happy ~ poly(Year, 2), data = marriage)
+summary(mar2)
+
+ggplot(marriage, aes(x = Year, y = Happy)) +geom_point() + ylim(c(6,8)) + 
+  scale_x_continuous(breaks = 1:10) + labs(x = "Years", y = "Happinesss") +
+  stat_smooth(method = 'lm', se = FALSE, formula =  y~poly(x,2))
+
+ggplot(marriage, aes(x = Year, y = Happy)) +geom_point() + ylim(c(6,8)) + 
+  scale_x_continuous(breaks = 1:10) + labs(x = "Years", y = "Happinesss") +
+  stat_smooth(method = 'lm', se = FALSE, formula =  y~poly(x,6))
+
+mar6 <- lm(Happy ~ poly(Year, 6), data = marriage)
+summary(mar6)
+
+ggplot(marriage, aes(x = Year, y = Happy)) +geom_point() + ylim(c(6,8)) + 
+  scale_x_continuous(breaks = 1:10) + labs(x = "Years", y = "Happinesss") +
+  stat_smooth(method = 'lm', se = FALSE, formula =  y~poly(x,8))
+
+mar8 <- lm(Happy ~ poly(Year, 8), data = marriage)
+summary(mar8)
+
+ggplot(marriage, aes(x = Year, y = Happy)) +geom_point() + ylim(c(6,8)) + 
+  scale_x_continuous(breaks = 1:10) + labs(x = "Years", y = "Happinesss") +
+  stat_smooth(method = 'lm', se = FALSE, formula =  y~poly(x,9))
+
+mar9 <- lm(Happy ~ poly(Year, 9), data = marriage)
+summary(mar9)
