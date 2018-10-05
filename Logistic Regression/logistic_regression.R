@@ -20,3 +20,40 @@ exp(coef(model2))
 coef(model2)
 exp(3.29101970 -0.30032638*2 - 0.02688245*17) /(1 + exp(3.29101970 -0.30032638*2 - 0.02688245*17))
 exp(3.29101970 -2.07951031 - 2.56329858 - 0.02688245*20) / ( 1 + exp(3.29101970 -2.07951031 - 2.56329858 - 0.02688245*20))
+
+# class 2 Football database
+
+seria <- read.csv("Logistic Regression/seriea_games.csv")
+head(seria)
+                                         
+fmod <- glm(Result ~ FTHG, family = "binomial", data =seria)
+summary(fmod)
+
+exp(coef(fmod))
+
+t <- table(seria$FTHG, seria$Result)
+t
+Wins <- t[,2]
+df <- data.frame(Goals = 0:7, Wins)
+df
+
+df$props <- prop.table(t,1)[,2]
+
+library(ggplot2)
+ggplot(df, aes(x = Goals, y = props)) + geom_point() + geom_smooth(se = F)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
