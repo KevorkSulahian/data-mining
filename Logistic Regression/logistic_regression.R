@@ -43,6 +43,37 @@ library(ggplot2)
 ggplot(df, aes(x = Goals, y = props)) + geom_point() + geom_smooth(se = F)
 
 
+# testing performance
+
+credit <- read.csv("Logistic Regression/Credit.csv")
+str(credit)
+
+prop.table(table(credit$default))
+
+library(caret)
+set.seed(1)
+
+trainIndex <- createDataPartition(credit$default, 
+                                  p = .8, list = FALSE)
+
+
+train <- credit[trainIndex, ]
+test <- credit[-trainIndex,]
+
+credit1 <- glm(default ~., data = train, family = "binomial") 
+summary(credit1)
+
+predict1 <- predict(credit1, newdata = test, type = "response") 
+predict1[1:50]
+
+addmargins(table(test$default, predict1 > .5))
+
+pr_classes <- factor(ifelse(predict1 > .5, "Yes", "No"))
+
+addmargins(table(test$default, predict1 > .5))
+
+library(e1071)
+confusionMatrix(pr_classes, test$default, positive = "Yes")
 
 
 
@@ -56,4 +87,9 @@ ggplot(df, aes(x = Goals, y = props)) + geom_point() + geom_smooth(se = F)
 
 
 
- 
+
+
+
+
+
+
