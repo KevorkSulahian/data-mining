@@ -75,21 +75,33 @@ addmargins(table(test$default, predict1 > .5))
 library(e1071)
 confusionMatrix(pr_classes, test$default, positive = "Yes")
 
+library(ROCR)
 
+p_test <- prediction(predict1, test$default)
 
+perf <- performance(p_test, "tpr", "fpr")
 
+plot(perf, colorize = T)
 
+performance(p_test, "auc")@y.values
 
+str(perf)
 
+FPR <- unlist(perf@x.values)
+TPR <- unlist(perf@y.values)
+alpha = unlist(perf@alpha.values)
 
+df <- data.frame(FPR, TPR, alpha)
+head(df)
 
+table(test$default, predict1 > 0.92)
 
+ggplot(df, aes(x = FPR, y = TPR, color = alpha)) + geom_line()
 
+diabities <- read.csv("Decision Trees/Diabetes.csv")
 
+sample <- sample(nrow(diabities), floor(nrow(diabities) * .8))
+train <- diabities[sample,]
+test <- diabities[-sample,]
 
-
-
-
-
-
-
+model <- model(Class~., data = train)

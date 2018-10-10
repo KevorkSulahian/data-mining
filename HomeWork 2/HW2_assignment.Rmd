@@ -16,6 +16,8 @@ knitr::opts_chunk$set(echo = TRUE, warning=F, message=F)
 Pay attention to the variable grade. You can use function cut() here os something like it.
 
 ```{r}
+
+## Delete some shit bro
 house <- read.csv("housing.csv")
 str(house)
 house$date <- sub("T000000", "", house$date)
