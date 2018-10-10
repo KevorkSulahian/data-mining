@@ -1,0 +1,9 @@
+## NTS - Number of times pregnant	
+## PGC - Plasma glucose concentration	
+## DBP - Diastolic blood pressure (mm Hg)	
+## TSFT - Triceps skin fold thickness (mm)	
+## INS - 2-Hour serum insulin (mu U/ml)	
+## BMI -  Body Mass Index
+## DPF - Diabetes pedigree function
+## Age	
+## Class  - Negaive (No diabetes), Positive (Diabetes)
