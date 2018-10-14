@@ -2,7 +2,7 @@
 title: "Homework 2"
 author: ""
 date: ""
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -21,8 +21,12 @@ Pay attention to the variable grade. You can use function cut() here os somethin
 house <- read.csv("housing.csv")
 str(house)
 house$date <- sub("T000000", "", house$date)
-house$date <- as.numeric(house$date)
-#house <- transform(house, date = as.Date(as.character(date), "%Y%m%d"))
+house <- transform(house, date = as.Date(as.character(date), " %Y%m%d"))
+house$waterfront <- factor(house$waterfront, levels= c(0,1), labels = c("False", "True"))
+house$view <- factor(house$view, levels = c(0,1,2,3,4))
+house$condition <- factor(house$condition, levels = c(1,2,3,4,5))
+house$grade <- cut(house$grade, breaks = 3)
+house$grade <- factor(house$grade,labels = c("L", "M", "H"))
 ```
 
 (2 points) Create a variable with building's age (The data is collected at 2018). visualize the relationship between the newly created variable with the price and comment whether it can be significant predictor for the price.
@@ -39,8 +43,10 @@ ggplot(house, aes(x = age, y = price)) + geom_point()
 Hint: use function ?cor()
 
 ```{r}
-sapply(house, is.numeric)
-cor(house)
+#sapply(house, is.numeric)
+attach(house)
+house = house[, -c(1, 2, 17, 18, 19)]
+cor(house[, c(1,2,3,4,5,6,11,12,13,14,15,16,17)] , use = "everything")
 ```
 
 (3 points) Visualize the relationship between the independent variables. In case you see it might cause multicolinearity  during the modeling, also print correlation coeficients and make a note to act accordingly during modeling.
@@ -49,15 +55,16 @@ Hint: usually variables having more than 0.7 correlation coeficients might cause
 1. the relationship between numbeer of bedrooms and living area in sqft
 
 ```{r}
-attach(house)
+
 cor(bedrooms, sqft_living) # 0.57
 ggplot(house, aes(x = bedrooms,y = sqft_living)) + geom_point() +
-  xlim(c(1,10))
+  xlim(c(1,10)) + labs(y = "living area in squarefoot")
 ```
 2. the relationship betweeen the living area in sqft and the number of bathrooms
 ```{r}
 cor(sqft_living, bathrooms) # .75 => multicolinearity 
-ggplot(house, aes(x = sqft_living, y = bathrooms)) + geom_point()
+ggplot(house, aes(x = sqft_living, y = bathrooms)) + geom_point() +
+  labs(x = "living area in squarefoot")
 ```
 3. the relationship between number of bedrooms and number of bathrooms
 ```{r}
@@ -69,7 +76,8 @@ ggplot(house, aes(x = bedrooms, y = bathrooms)) + geom_point() +
 4. the relationship betwen sqft_living and sqft_above 
 ```{r}
 cor(sqft_living,sqft_above) # .87 => multicolinearity
-ggplot(house, aes(x = sqft_living, y = sqft_above)) + geom_point()
+ggplot(house, aes(x = sqft_living, y = sqft_above)) + geom_point() +
+  labs(x = "living area in squarefoot", y = "living area above the ground")
 
 ```
 
@@ -77,7 +85,6 @@ ggplot(house, aes(x = sqft_living, y = sqft_above)) + geom_point()
 Also try to visualize whether the relationship between price and other numeric variables differ based on categorical variables such as waterfront, view, condition and grade.
 ```{r}
 # waterfront, view, condition, grade
-#house$waterfront <- as.factor(house$waterfront)
 ggplot(house, aes(x = waterfront , y = price))+ geom_point()
 ggplot(house, aes(x = view , y = price))+ geom_point()
 ggplot(house, aes(x = condition , y = price))+ geom_point()
@@ -93,11 +100,8 @@ test <- house[-sample,]
 
 (4 points) Build an inittial model on Training dataset including as predictors all possible variables and comment on the model performance based on R square and R square Adjusted (which one will you use in this case).
 ```{r}
-model1 <- lm(price ~ date + bedrooms +bathrooms + sqft_living +
-               sqft_lot + floors+ waterfront + view + condition +
-               grade + sqft_above + yr_built + yr_renovated +zipcode +
-               lat + long + sqft_living15 + sqft_lot15, data = train)
-summary(model1) # r = .702, r^2 = .7016
+model1 <- lm(price ~., data = train)
+summary(model1) # r = .642, r^2 = .6416
 # R and R^2 are close and higher than the 50% which means that our model is good
 ```
 
@@ -118,19 +122,34 @@ Comment on the relationships between each independent variable with the dependen
 (4 points) Remove the variables you consider might cause multicolinearity, explain the logic how you decide to omit this or that variable from the correlated pairs. Comment on the changes of model performance based on R square and coefficients.
 
 ```{r}
-
+model2 <- lm(price ~. , data = subset(house, select = c(-sqft_lot15, -sqft_living15, -sqft_above)))
+summary(model2)
+#r and r^2 became lower, the ones i chose to remove were the one corrolated most
 ```
 
 (3 points) Try changing the reference group for grade variable to be high,(use the function ?relevel)
 run and save the 3rd model. Comment on the changes of coefficients, their significance and the overall model performance. 
 ```{r}
-library(olsrr)
-ols_coll_diag(model1)
+house$grade <- relevel(house$grade, ref='H')
+model3 <- lm(price~., data=house)
+summary(model3)
+# the coefficient of this one is higher because "H" will make the price og the house be higher
+# and this also caused the r and r^2 to drop to 0.63
 ```
 
 
 (3 points) Make predictions on the testing data set using all 3 models, calculate RMSE and comment what model is doing better
 ```{r}
+pred1 <- predict(model1, newdata = test)
+sqrt(mean((test$price- pred1)^2))
+#221559.6
+pred2 <- predict(model2, newdata = test)
+sqrt(mean((test$price- pred2)^2))
+#222467.7
+pred3 <- predict(model3, newdata = test)
+sqrt(mean((test$price- pred3)^2))
+#220637.6
 
+# => second model
 ```
 
