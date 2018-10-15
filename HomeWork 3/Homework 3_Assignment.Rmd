@@ -1,6 +1,6 @@
 ---
 title: "Homework 3"
-author: ""
+author: "Kevork Sulahian"
 date: "October 8, 2017"
 output:
   html_document: default
@@ -10,6 +10,11 @@ output:
 The general objective of this analysis will be predicting the whether certain employees will quit their job at this company or not (which is reflected in Attrition variable). First, ckeck whether the variables have right data types, , make appropriate corrections, if needed.
 
 ```{r}
+att <- read.csv("Attrition2.csv")
+str(att)
+att$EnvironmentSatisfaction <- as.factor(att$EnvironmentSatisfaction, levels = c(1:4), labels = c("low", "medium", "high", "very high"))
+att$JobLevel <- as.factor(att$JobLevel)
+att$StockOptionLevel <- as.factor(att$StockOptionLevel)
 
 ```
 
@@ -19,12 +24,25 @@ Second, using ggplot2 construct a barplot to show the relationship between these
 Third, construct a barplot illustrating the relationship between Environment Satisfaction and Attrition
 Comment on all the results
 ```{r}
+attach(att)
+model1 <- glm(Attrition ~ OverTime, data = att, family = "binomial")
+summary(model1)
+exp(coef(model1)) 
+# if the worker doesn't work overtime then the chances of them leaving the job will decrease by 1/(3.5) = 28%
+1/exp(coef(model1))[2]
 
+library(ggplot2)
+ggplot(att, aes(x=Attrition, y = OverTime, fill= OverTime)) + geom_bar(stat = "identity")
+
+ggplot(att, aes(x= Attrition, y = EnvironmentSatisfaction, fill = EnvironmentSatisfaction)) + geom_bar(stat ="identity")
 ```
 
 (3 points)
 USing ggplot2 visualize the difference between the distribution of the DailyRate depending on the fact whetehr the employee left the company or stayed and comment on the differences.
 ```{r}
+options(scipen=10000)
+
+ggplot(att, aes(x = DailyRate)) + geom_histogram() + facet_grid(Attrition~.)
 
 ```
 
@@ -32,13 +50,28 @@ USing ggplot2 visualize the difference between the distribution of the DailyRate
 This time, use caret package for data partitioning.
 
 ```{r}
-
+library(caret)
+set.seed(1)
+trainIndex <- createDataPartition(att$Attrition,
+                                  p = .8, list = F) 
+train <- att[trainIndex,]
+test <- att[-trainIndex,]
 ```
 
 
 (5 points) Build a logistic regression model on the train data set having Attrition as a dependent variable and all the others as independent variabless . Comment on which variables are significant for the model. Lookng at the signs of coeficients, comment whether the relationships are the same as while running the above analysis.
 
 ```{r}
+model2 <- glm(Attrition ~., data = train, family = "binomial")
+summary(model2)
+
+### According to the model the most significant variables are:
+### 1- EnvironmentSatisfaction - high, 2 - JobLevel - second lowest type (2),
+### 3- OverTimes - Yes, 4 - StockOptionLevel - 1
+
+## the relationship is not the same since the independent variables here are negative
+
+# ??????????????
 
 ```
 
@@ -46,16 +79,29 @@ This time, use caret package for data partitioning.
 (7 points) Print the coeficients of the model, also  create the exponents of the coeficients. How will you interpret the coefficients in terms of their impact on odds and logit (log odds). Comment on 4 variables: 2 numeric and 2 categorical ones.
 
 ```{r}
+coef(model2)
+exp(coef(model2))
+# ask if we gonna interpert on coeff or exp(coeff)
 
+## YearsInCurrentRole means that for every year increase the ratio of quitting decreases by 10%
+## OverTime - the odds of qutting in response to working overtime is 460%
+## JobLevel
+### JobLevel2 has 42% of staying in compared to 1
+### JobLevel3 has 94% of staying in compared to 1
+### JobLevel4 has 18% of staying in compared to 1
+### JobLevel5 has 42% of staying in compared to 1
+## Daily rate the more it decreases the more chance of leaving
 ```
 
 (4 points) Using the coeficients, calculate the probability of an employee to leave the company if the given employee's daily rate is 356, environment satisfaction is high, joblevel is 2, has worked overtime, uses 2nd stock option, has worked for 3 years and 2 years of this were in the same position.
 ```{r}
-
+exp(0.2136790454 + -0.0004588847*356 + -1.0856993575 + -0.8478493176 + 1.5308126708 + -1.2684692183 + 3* -0.0061995670 + 2*-0.1001400536) /(1 + exp(0.2136790454 + -0.0004588847*356 + -1.0856993575 + -0.8478493176 + 1.5308126708 + -1.2684692183 + 3* -0.0061995670 + 2*-0.1001400536)) # 13%
 ```
 
 (3 points) Build and save another model eliminating the variables which were not significant predictors for attrition.
 ```{r}
+model3 <- glm(Attrition ~ EnvironmentSatisfaction + JobLevel + OverTime + StockOptionLevel + YearsInCurrentRole, 
+              data = att, family = "binomial")
 
 ```
 
@@ -64,12 +110,53 @@ Using the threshhold of 0.5, convert probabilities into classes.Create a confusi
 Calculate the accuracy of the models,sensitivity and specificity,Positive and negative predictive values(PPV and NPV). Make comments on the models' peformance based on these indicators.
 Are those performing beter than comparing accuracy with no information rate?
 ```{r}
+pr1 <- predict(model2, newdata = test, type = "response")
+pr1_classes <- factor(ifelse(pr1 > 0.5, "Yes", "No"))
+addmargins(table(test$Attrition, pr1_classes))
+# Overal acuracy
+(192 + 9) / 235 # 0.8553191
+#Sensetivity
+9 / 38 # 0.2368421
+# specificity
+192/ 197 # 0.9746193
+# PPV
+9/ 14 #0.6428571
+#NPV
+192 / 221 # 0.8687783
 
+pr2 <- predict(model3, newdata = test, type = "response")
+pr2_classes <- factor(ifelse(pr2 > 0.5, "Yes", "No"))
+addmargins(table(test$Attrition, pr2_classes))
+#Overal accuracy
+(193 + 10) / (235) # 0.8638298
+#Sensetivity 
+14/ 38 # 0.3684211
+#specificity
+193/197 # 0.9796954
+#PPV
+10 / 14 #0.7142857
+#NPV
+193 / 221 # 0.8733032
+
+# Model3 is slightly better than model2 
 ```
 
 
 (7 points) Use the threshhold of 0.7 while creating the confusion matrix for the second model. Elaborate on the changes in sensitivity, specificity, PPV, NPV and overall accuracy. which classification makes your model better?
 ```{r}
+pr2_1 <- predict(model3, newdata = test, type = "response")
+pr2_1_classes <- factor(ifelse(pr2 > 0.7, "Yes", "No"))
+addmargins(table(test$Attrition, pr2_1_classes))
+# Overall Accuracy
+(197 + 4) / 235 # 0.8553191 is worse than the previous
+# Sensitivity
+4/ 38 # 0.1052632 much worse than the previous
+#specificity
+197 / 197 # 1 since the threshold is 70% then the model will say No more than yes and because of that our specificity and PPV are high (1)
+#PPV
+4 / 4 # 1
+# NPV
+197 / 231 # 0.8528139 # worse than the old mode
 
 ```
 
@@ -79,5 +166,30 @@ Calculate AUC value for each model and make relevant comparisons.
 
 
 ```{r}
+library(ROCR)
+P_1_test <- prediction(pr1, test$Attrition)
+perf1 <- performance(P_1_test, "tpr", "fpr")
+performance(P_1_test, "auc")@y.values # 0.8216671
+FPR <- unlist(perf1@x.values)
+TPR <- unlist(perf1@y.values)
+alpha <- unlist(perf1@alpha.values)
+df <- data.frame(FPR, TPR, alpha)
 
+ggplot(df, aes(x = FPR, y = TPR, color = alpha)) + geom_line() +
+  theme_light() + labs(x = "False Positive Rate", y = "True Positive Rate",
+                       title = "ROC Curve model 1", color = "Cutoff values")
+
+P_2_test <- prediction(pr2, test$Attrition)
+perf2 <- performance(P_2_test, "tpr", "fpr")
+performance(P_2_test, "auc")@y.values # 0.8371627
+FPR <- unlist(perf1@x.values)
+TPR <- unlist(perf1@y.values)
+alpha <- unlist(perf1@alpha.values)
+df2 <- data.frame(FPR, TPR, alpha)
+
+ggplot(df2, aes(x = FPR, y = TPR, color = alpha)) + geom_line() +
+  theme_light() + labs(x = "False Positive Rate", y = "True Positive Rate",
+                       title = "ROC Curve model 2", color = "Cutoff values")
+
+# Add some shit later
 ```
