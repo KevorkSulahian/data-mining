@@ -1,0 +1,83 @@
+---
+title: "Homework 3"
+author: ""
+date: "October 8, 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+(1 point) Read the file Attrition.csv into R. 
+The general objective of this analysis will be predicting the whether certain employees will quit their job at this company or not (which is reflected in Attrition variable). First, ckeck whether the variables have right data types, , make appropriate corrections, if needed.
+
+```{r}
+
+```
+
+(4 poimts) Explore the relationship between the variables OverTime and Attrition.
+First calculate what is the probability that an emloyee leavs the company given that he/she worked overtime.
+Second, using ggplot2 construct a barplot to show the relationship between these variables (based on probabilities of attrition)
+Third, construct a barplot illustrating the relationship between Environment Satisfaction and Attrition
+Comment on all the results
+```{r}
+
+```
+
+(3 points)
+USing ggplot2 visualize the difference between the distribution of the DailyRate depending on the fact whetehr the employee left the company or stayed and comment on the differences.
+```{r}
+
+```
+
+(1 point)Subset the data into 2 random samples, 1st one will serve as a training data set containing 80% of the cases from Attrition data set while the 2nd will be the test dataset containing the 20% of the cases, respectively.(Do not forget to set seed)
+This time, use caret package for data partitioning.
+
+```{r}
+
+```
+
+
+(5 points) Build a logistic regression model on the train data set having Attrition as a dependent variable and all the others as independent variabless . Comment on which variables are significant for the model. Lookng at the signs of coeficients, comment whether the relationships are the same as while running the above analysis.
+
+```{r}
+
+```
+
+
+(7 points) Print the coeficients of the model, also  create the exponents of the coeficients. How will you interpret the coefficients in terms of their impact on odds and logit (log odds). Comment on 4 variables: 2 numeric and 2 categorical ones.
+
+```{r}
+
+```
+
+(4 points) Using the coeficients, calculate the probability of an employee to leave the company if the given employee's daily rate is 356, environment satisfaction is high, joblevel is 2, has worked overtime, uses 2nd stock option, has worked for 3 years and 2 years of this were in the same position.
+```{r}
+
+```
+
+(3 points) Build and save another model eliminating the variables which were not significant predictors for attrition.
+```{r}
+
+```
+
+(8 points) Use the 2 models you built to make predictions on the test data set
+Using the threshhold of 0.5, convert probabilities into classes.Create a confusion matrixes for both.
+Calculate the accuracy of the models,sensitivity and specificity,Positive and negative predictive values(PPV and NPV). Make comments on the models' peformance based on these indicators.
+Are those performing beter than comparing accuracy with no information rate?
+```{r}
+
+```
+
+
+(7 points) Use the threshhold of 0.7 while creating the confusion matrix for the second model. Elaborate on the changes in sensitivity, specificity, PPV, NPV and overall accuracy. which classification makes your model better?
+```{r}
+
+```
+
+
+(7 points) Create a ROC curves for each mdoel and comment on it.
+Calculate AUC value for each model and make relevant comparisons.
+
+
+```{r}
+
+```

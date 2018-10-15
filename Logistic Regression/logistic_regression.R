@@ -13,11 +13,11 @@ exp(coef(model1))
 
 addmargins(table(Titanic$sex, Titanic$survived))
 
-model2 <- glm(survived ~ sex + pclass + age + sibsp, family = "binomial", data = Titanic)
-summary(model2)
+model22 <- glm(survived ~ sex + pclass + age + sibsp, family = "binomial", data = Titanic)
+summary(model22)
 
-exp(coef(model2))
-coef(model2)
+exp(coef(model22))
+coef(model22)
 exp(3.29101970 -0.30032638*2 - 0.02688245*17) /(1 + exp(3.29101970 -0.30032638*2 - 0.02688245*17))
 exp(3.29101970 -2.07951031 - 2.56329858 - 0.02688245*20) / ( 1 + exp(3.29101970 -2.07951031 - 2.56329858 - 0.02688245*20))
 

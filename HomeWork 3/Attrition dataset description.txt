@@ -1,0 +1,13 @@
+Attrition: Yes means  the empoyee left the company, No, the employee stayed in t he company.
+
+DailyRate: numeric variable indicating the daily salary rate of each employee
+
+EnvironmentSatisfaction: should be factor variable with the following values: 1-4 with the respective labels of "low", "medium", "high", "very high"
+
+Jobleve: should be factor, 1 is the lowest level, 5 is the highest level
+
+StockOption: should be factor variable
+
+TotalWorkingYear: is a numeric variable indicating how many years of work experience each employee has
+
+YearsInCurrentRole: is a numeric variable indicating the number of years the employee is working in the same position
