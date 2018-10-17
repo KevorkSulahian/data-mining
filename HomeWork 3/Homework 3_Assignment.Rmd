@@ -12,7 +12,7 @@ The general objective of this analysis will be predicting the whether certain em
 ```{r}
 att <- read.csv("Attrition2.csv")
 str(att)
-att$EnvironmentSatisfaction <- as.factor(att$EnvironmentSatisfaction, levels = c(1:4), labels = c("low", "medium", "high", "very high"))
+att$EnvironmentSatisfaction <- factor(att$EnvironmentSatisfaction, levels = c(1:4), labels = c("low", "medium", "high", "very high"))
 att$JobLevel <- as.factor(att$JobLevel)
 att$StockOptionLevel <- as.factor(att$StockOptionLevel)
 
@@ -32,15 +32,17 @@ exp(coef(model1))
 1/exp(coef(model1))[2]
 
 library(ggplot2)
-ggplot(att, aes(x=Attrition, y = OverTime, fill= OverTime)) + geom_bar(stat = "identity")
-
-ggplot(att, aes(x= Attrition, y = EnvironmentSatisfaction, fill = EnvironmentSatisfaction)) + geom_bar(stat ="identity")
+ggplot(att, aes(x=Attrition, y = nrow(att), fill= OverTime)) + geom_bar(stat = "identity") +
+  labs(x = "left the job or not", y = "Number of workers 1200", title = "relation between attrition and overtime workers")
+# not sure why its adding random zeros
+ggplot(att, aes(x= Attrition, y = nrow(att), fill = EnvironmentSatisfaction)) + geom_bar(stat ="identity") +
+  labs(x = "left the job or not", y = "Number of workers 1200", title = "relation between attrition and work enviroment satisfaction")
 ```
 
 (3 points)
 USing ggplot2 visualize the difference between the distribution of the DailyRate depending on the fact whetehr the employee left the company or stayed and comment on the differences.
 ```{r}
-options(scipen=10000)
+options(scipen= 1)
 
 ggplot(att, aes(x = DailyRate)) + geom_histogram() + facet_grid(Attrition~.)
 
@@ -71,7 +73,7 @@ summary(model2)
 
 ## the relationship is not the same since the independent variables here are negative
 
-# ??????????????
+# the relationship with attrition and overtime workers is stil important
 
 ```
 
@@ -169,7 +171,6 @@ Calculate AUC value for each model and make relevant comparisons.
 library(ROCR)
 P_1_test <- prediction(pr1, test$Attrition)
 perf1 <- performance(P_1_test, "tpr", "fpr")
-performance(P_1_test, "auc")@y.values # 0.8216671
 FPR <- unlist(perf1@x.values)
 TPR <- unlist(perf1@y.values)
 alpha <- unlist(perf1@alpha.values)
@@ -181,7 +182,6 @@ ggplot(df, aes(x = FPR, y = TPR, color = alpha)) + geom_line() +
 
 P_2_test <- prediction(pr2, test$Attrition)
 perf2 <- performance(P_2_test, "tpr", "fpr")
-performance(P_2_test, "auc")@y.values # 0.8371627
 FPR <- unlist(perf1@x.values)
 TPR <- unlist(perf1@y.values)
 alpha <- unlist(perf1@alpha.values)
@@ -191,5 +191,11 @@ ggplot(df2, aes(x = FPR, y = TPR, color = alpha)) + geom_line() +
   theme_light() + labs(x = "False Positive Rate", y = "True Positive Rate",
                        title = "ROC Curve model 2", color = "Cutoff values")
 
-# Add some shit later
+
+# The AUC for the first model can be simply calculated by
+performance(P_1_test, "auc")@y.values # 0.8216671
+# And the AUC for the second model is
+performance(P_2_test, "auc")@y.values # 0.8371627
+
+# as it is visible the AUC for the second model is higher than the first one
 ```
