@@ -1,0 +1,110 @@
+---
+title: "Homework 4"
+author: ""
+date: ""
+output:
+  html_document: default
+  pdf_document: default
+---
+
+Read the file Cust_churn
+This data set contains infomation about  telecommunication company customers behavior
+The data set includes information about:
+Customers who left within the last month - the column is called Churn
+The number of weeks since the subsciption_variable name is Account Length
+The number of text messages (Message), number of minutes spent on day time, evening, night and for international calls in respective variables, 
+The number of times a customer  calls the call center (Callcenter enquiry)
+The variables Call.Plan and Message.Plan indicate whether the customer has subscription to call plan and/or message plan.
+```{r}
+
+```
+
+
+The main objective of this assignment will be building models which will predict the customer churn (meaning that a customer stops using the services of this telecom company) as accurately as possible.
+
+(1 point) Check if the classes of the variables are correctly understood by R, if not, change the types of the factor variables.
+```{r}
+
+```
+
+(5 points) run some exploratoey analysis to explore the dependence between customer churn and other variables
+```{r}
+
+```
+
+Visulize the relationship of call center enquiries and churn
+```{r}
+
+```
+
+Make visualization and comment on the difference between the distribution of minutes spent during daytime depending whether the customer left the company or not.
+```{r}
+
+```
+
+Construct hitograms for Evening  minutes and night minutes depending on the churn and make your comments.
+
+```
+
+
+Create a variable total min whichwill be equal to the sum of minuts spent during day time, evening and night. Then visualize the distribution of this variable based on call plan and churn. comment on the finding.
+```{r}
+
+```
+
+Visualize the relationship between message plan and churn. Do those who have a message plan have lower probability of attrition?
+```{r}
+
+```
+
+(1 point) divide the data into train and test datasets having 80% of the cases in he training ataset
+```{r}
+
+
+```
+
+(7 points) Build a decision tree on the Train dataset aiming to predict the customer churn, point)
+Plot two decision trees, first displaying  number of cases in each node and the second displaying the probabilities.
+
+```{r}
+
+
+```
+
+(5 points)
+calculate Gini index and Entropy for any two terminal nodes
+```{r}
+
+```
+
+(7 points) Make R display the decision rules and cmment on 3 rules. 
+```{r}
+
+```
+
+(3 points) Build a logistic regression model on the same Training dataset having churn as a dependent variable and calculate exponents of the coeficients
+```{r}
+
+```
+
+(7 points) if the customer has the following characteristics:
+DayMins=260, EveMins=150, Call.center.Enq=10, does not have message and call plans, have not made any international calls and messages and the account length is 20. Looking at the decision rules, what is the probability that a customer may churn?
+use the coeficients to calculate the same probability using the logistic regression model. See whether there are significant differences and make comment.
+```{r}
+
+```
+
+
+(8 points) Use the two models to make predictions on the Test data set,
+Build a confusion matrix and comment on models' performance based on accuracy, sensitivity, specificity, PPV, NPV. Which one is doing better?
+
+```{r}
+
+```
+
+(6 points) Build  ROC curves and calculate AUC for both models and comment on the results.
+```{r}
+
+```
+
+
