@@ -1,6 +1,6 @@
 ---
 title: "Homework 4"
-author: ""
+author: "Kevork Sulahian"
 date: ""
 output:
   html_document: default
@@ -16,7 +16,7 @@ The number of text messages (Message), number of minutes spent on day time, even
 The number of times a customer  calls the call center (Callcenter enquiry)
 The variables Call.Plan and Message.Plan indicate whether the customer has subscription to call plan and/or message plan.
 ```{r}
-
+data <- read.csv("Cust_Churn.csv")
 ```
 
 
@@ -24,7 +24,10 @@ The main objective of this assignment will be building models which will predict
 
 (1 point) Check if the classes of the variables are correctly understood by R, if not, change the types of the factor variables.
 ```{r}
-
+sapply(data, class)
+data$Churn <- factor(data$Churn, levels = c(0,1) ,labels = c("No", "Yes"))
+data$Call.Plan <- factor(data$Call.Plan)
+data$Message.Plan <- factor(data$Message.Plan)
 ```
 
 (5 points) run some exploratoey analysis to explore the dependence between customer churn and other variables
@@ -34,64 +37,87 @@ The main objective of this assignment will be building models which will predict
 
 Visulize the relationship of call center enquiries and churn
 ```{r}
+attach(data)
+library(ggplot2)
+ggplot(data, aes(x = CallCenter.enquiry))  + geom_histogram(bins = 10) +
+  facet_grid(.~Churn)
 
 ```
 
 Make visualization and comment on the difference between the distribution of minutes spent during daytime depending whether the customer left the company or not.
 ```{r}
+ggplot(data, aes(x = Churn, y = Day.Mins))  + geom_bar(stat = "identity")
 
 ```
 
 Construct hitograms for Evening  minutes and night minutes depending on the churn and make your comments.
 
+```{r}
+ggplot(data, aes(x = Day.Mins)) + geom_histogram() + facet_grid(.~Churn)
+ggplot(data, aes(x = Night.Mins)) + geom_histogram() + facet_grid(.~Churn)
+
 ```
-
-
 Create a variable total min whichwill be equal to the sum of minuts spent during day time, evening and night. Then visualize the distribution of this variable based on call plan and churn. comment on the finding.
 ```{r}
+data$Total.Mins <- data$Day.Mins + data$Night.Mins + data$Eve.Mins
+ggplot(data, aes(x = Total.Mins)) + geom_histogram() + facet_grid(.~Churn)
 
 ```
 
 Visualize the relationship between message plan and churn. Do those who have a message plan have lower probability of attrition?
 ```{r}
-
+library(lattice)
+histogram(~data$Message.Plan+ Churn, data)
 ```
 
 (1 point) divide the data into train and test datasets having 80% of the cases in he training ataset
 ```{r}
-
-
+library(caret)
+index <- createDataPartition(data$Churn, p = .8, list = F)
+train <- data[index,]
+test <- data [-index,]
 ```
 
 (7 points) Build a decision tree on the Train dataset aiming to predict the customer churn, point)
 Plot two decision trees, first displaying  number of cases in each node and the second displaying the probabilities.
 
 ```{r}
-
-
+library(rpart)
+library(rpart.plot)
+model <- rpart(Churn~., data = train)
+prp(model, type = 1) 
+prp(model, type = 2, extra = 4, main = "probs yo")
 ```
 
 (5 points)
 calculate Gini index and Entropy for any two terminal nodes
 ```{r}
-
+# by hand?
+1 - (48/129)^2 - (81/129)^2
+#0.46
+((48/129) * log2(48/129)) + ((81/129) * log2(81/129))
+# - 0.9
 ```
 
 (7 points) Make R display the decision rules and cmment on 3 rules. 
 ```{r}
-
+library(rattle)
+asRules(model)
 ```
 
 (3 points) Build a logistic regression model on the same Training dataset having churn as a dependent variable and calculate exponents of the coeficients
 ```{r}
-
+model_reg <- glm(Churn~., data = train, family = "binomial")
+exp(coef(model_reg))
+coef(model_reg)
 ```
 
 (7 points) if the customer has the following characteristics:
 DayMins=260, EveMins=150, Call.center.Enq=10, does not have message and call plans, have not made any international calls and messages and the account length is 20. Looking at the decision rules, what is the probability that a customer may churn?
 use the coeficients to calculate the same probability using the logistic regression model. See whether there are significant differences and make comment.
 ```{r}
-
+exp(-7.9442434977 + 0.0115492700 *260 + 0.0062468588 * 150 + 0.5029836191*10 + 0.0004000628 * 20) / (1 + exp(-7.9442434977 + 0.0115492700 *260 + 0.0062468588 * 150 + 0.5029836191*10 + 0.0004000628 * 20))
+# 0.7375809
 ```
 
 
@@ -99,12 +125,33 @@ use the coeficients to calculate the same probability using the logistic regress
 Build a confusion matrix and comment on models' performance based on accuracy, sensitivity, specificity, PPV, NPV. Which one is doing better?
 
 ```{r}
+pred_reg <- predict(model_reg, newdata = test, type = "response")
+pr_classes1 <- factor(ifelse(pred_reg > .5, "Yes", "No"))
+confusionMatrix(pr_classes1, test$Churn, positive = "Yes")
+
+
+##
+
+pred_tree <- predict(model, test, type = "class")
+confusionMatrix(pred_tree, test$Churn, positive = "Yes")
 
 ```
 
 (6 points) Build  ROC curves and calculate AUC for both models and comment on the results.
 ```{r}
+library(ROCR)
+pred_reg <- predict(model_reg, test)
+P_test <- prediction(pred_reg, test$Churn)
+perf <- performance(P_test, "tpr", "fpr")
+plot(perf)
+performance(P_test, "auc")@y.values
 
+# tree
+pred_tree <- predict(model, test)
+P_test <- prediction(pred_tree[,2], test$Churn)
+perf <- performance(P_test, "tpr", "fpr")
+plot(perf)
+performance(P_test, "auc")@y.values
 ```
 
 
