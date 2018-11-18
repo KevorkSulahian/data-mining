@@ -60,17 +60,22 @@ diab <- read.csv("Decision Trees/Diabetes.csv")
 set.seed(1)
 ctrl <- trainControl(method = "cv", number = 10)
 
+rm(train)
 
-knn_c <- train(Class~., data = diab, method = "knn", 
-               trControl = ctrl, preProcess = c("centern", "scale"), tunLength = 10)
-
-#### WHAT
-
+knn_c <- train(Class~., data = diab, method = "knn",
+               trControl = ctrl, preProcess = c("center", "scale"), tuneLength = 10)
 
 
+knn_c$results
 
+plot(knn_c)
 
+grid <-expand.grid(k=10:20)
 
+knn_c1 <- train(Class~., data = diab, method = "knn",
+               trControl = ctrl, preProcess = c("center", "scale"), tuneGrid = grid)
+
+plot(knn_c1)
 
 
 

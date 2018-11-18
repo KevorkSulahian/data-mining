@@ -1,0 +1,97 @@
+---
+title: "Homework 5"
+author: "Kevork Sulahian"
+date: ""
+output:
+ 
+---
+
+Read the file Songs which conntains data aboutj different sogns' parameters and 
+the variable Top10 indicates whether the song has been in the list of top10 songs. Your task will be building a model to predict this.
+```{r}
+df <- read.csv("songs.csv")
+```
+
+(2 points) Look for the summary=ies of  the variables and tell whether there is a need to standardize the variables for to run knn
+```{r}
+summary(df) # yeah we do need to scale 
+
+sc <- scale(df[,1:33])
+sc<- as.data.frame(sc)
+df[,1:33] <- sc
+```
+
+(5 points) USe the package caret to identify the optimal number of K.
+Run repeated k-fold cross validation.
+Use the accuracy for defining which number is the best.
+Do not forget to set seed
+```{r}
+library(caret)
+set.seed(1)
+cntrl<- trainControl(method = "cv", number = 10)
+knn_c <- train(Top10~., data = df, method ="knn",
+               trControl = cntrl,  preProcess = c("center", "scale"), tuneLength = 10)
+plot(knn_c) # k= 15
+```
+
+
+(8 points) Divide the data into Train (80% of cases) and Test(20% of cases) so that the distrubution of the variable Top10 doe snot change.
+Based on the results in the previous problem, choosethe most optimal number of K. Run Knn classification using the package class saving predicted probabilities.
+```{r}
+library(class)
+index<- createDataPartition(df$Top10, p =.8, list = F)
+train <- df[index,]
+test <- df[-index,]
+
+knn1 <- knn(train = train[,-34], cl = train$Top10, k = 15, test = test[,-34])
+attr(knn_p, "prob")
+knn_p <- knn(train = train[,-34], cl = train$Top10, k = 15, test = test[,-34], prob = T)
+my_data <- data.frame(class = knn1, probs = attr(knn_p, "prob"))
+head(my_data)
+
+```
+
+(5 points) Solve the same classification problem using decisioln tree and plot the tree displaying the number of cases in each node,
+```{r}
+
+```
+
+(10 points) Build Confusion matrix for both models (knn and decision tree), compare and comment on all the accuracy measures. 
+For knn use, both predicted classes and predicted probabilities in constructing the matrix. 
+
+Hint: when you use the predicted probabilities from the knn model, try to take different threshhold values and comment what is the optimal one.(0.5 might not work,)
+```{r}
+
+```
+
+(10 points) Build ROC curve and print AUC for both models. Comment on what is doing better.
+```{r}
+
+```
+
+Naive bayes
+(15 points)Having the following contingency tables, build Naive Bayes Model, to predict the class label and respective probabilities of attrition foran employee who does not have a stock option and has worked overtime.:
+
+      worked overtime hasb't worked overtime  Sum
+  No              751                    236  987
+  Yes              90                    100  190
+  Sum             841                    336 1177
+
+  no option option 1 option 2 option 3  Sum
+  No        378      430      122       57  987
+  Yes       124       45       10       11  190
+  Sum       502      475      132       68 1177
+
+
+(5 points) Build another model using Naive Bayes  on the training dataset. Commenton the tables of the model.
+```{r}
+library(e1071)
+model_NB<-naiveBayes(Top10~., data=Train, laplace=1)
+```
+
+(5 poits) Make confusion matrix, ROC Curve and calculate AUC. Does this model have more accurate results compared to knn and decision tree?  Make your comments considering all the accuracy measures.
+```{r}
+
+```
+
+
