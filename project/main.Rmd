@@ -1,0 +1,359 @@
+---
+title: "Group Project"
+authors: "Anna Tshngryan, Nona Baytalyan, Kevork Sulahian, Nana Karapetyan, Mariam Hayrapetyan"
+date: "02/12/2018"
+output:
+  html_document: default
+ 
+---
+
+First of all we load the data BlackFriday.csv and check the summary and structure to see 
+the datatypes of our variables and the possible absence of some values. We have 12 variables and 537577 observations. 
+Purchase is the dependent variable since that is what we want to predict later throughout the project.
+
+```{r}
+
+black_friday <-read.csv("BlackFriday.csv")
+summary(black_friday)
+str(black_friday)
+
+```
+
+Now, we put replace NAs of our dataset with 0s, for us not to lose the information we need. We may assume that people didn't buy anything from that category, that's why the value is NA. 
+
+```{r}
+
+black_friday[is.na(black_friday)] <- 0
+
+```
+
+Here we notice that there are only 5891 distinct people, meaning that lots of rows are refering to the exact same person. 
+
+```{r}
+
+length(unique(black_friday$User_ID))
+
+```
+
+
+In the code below we group our data frame by the User_IDs, so that each person is represented in the list with exactly one row. 
+For us not to lose the information, we sum the Product Categories and purchase amounts accordingly. 
+
+```{r}
+
+library(dplyr)
+
+black_friday_clean <- black_friday %>% group_by(User_ID) %>% summarise( Age=unique(Age), Gender = unique(Gender), Occupation=unique(Occupation),City_Category=unique(City_Category), Stay_In_Current_City_Years=unique(Stay_In_Current_City_Years),                                         Marital_Status=unique(Marital_Status),Purchase = sum(Purchase),
+Product_Category_1 = sum(Product_Category_1 ),
+Product_Category_2 = sum(Product_Category_2), 
+Product_Category_3 = sum(Product_Category_3 ) )
+
+str(black_friday_clean)
+summary(black_friday_clean)
+
+```
+
+Now we factorized the dependent variable for us to be easier to make some vizualizations. 
+
+```{r}
+
+bf <- black_friday_clean
+bf$Purchase = cut(bf$Purchase,c(44108,234914,512612,1099005,10536783))
+levels(bf$Purchase) = c("44108-234914","234915-512612","512613-1099005","1099006-10536783")
+str(bf)
+
+```
+
+Visualization of single and married participants on pie chart.
+
+```{r}
+
+mytable1 <- with(black_friday_clean,table(Marital_Status))
+lbls1 <- c("Single","Married")
+pct1 <- round(mytable1/sum(mytable1)*100)
+lbls1 <- paste(lbls1, pct1) 
+lbls1<- paste(lbls1,"%",sep="")
+pie(mytable1,labels = lbls1)
+
+```
+
+Visualization of participants of 3 different city categories (A,B,C) on pie chart.
+
+```{r}
+
+mytable2 <- with(bf,table(City_Category))
+lbls2 <- c("A","B","C")
+pct2 <- round(mytable2/sum(mytable2)*100)
+lbls2 <- paste(lbls2, pct2) 
+lbls2<- paste(lbls2,"%",sep="")
+pie(mytable2,labels = lbls2)
+
+```
+
+As we notice, most of the people are of age 26-35. There are 1069 people of age 18-25 and 1167 people of age 36-45.
+
+```{r}
+
+age_dep <- table(black_friday_clean$Age)
+age_dep
+
+library(ggplot2)
+
+ggplot(black_friday_clean, aes(x=Age)) + geom_bar(fill=rainbow(7)) + ggtitle("Age dependency") +  labs(x="Age Group",y="Number of customers") + annotate(geom = "text", x = 1, y = 150, label = "218") + annotate(geom = "text", x = 2, y = 1000, label = "1069") + annotate(geom = "text", x = 3, y = 2000, label = "2053") + annotate(geom = "text", x = 4, y = 1100, label = "1167") + annotate(geom = "text", x = 5, y = 450, label = "531") + annotate(geom = "text", x = 6, y = 420, label = "481") + annotate(geom = "text", x = 7, y = 300, label = "372")
+
+```
+Older people(55+) tend to spend less money on goods. If we look at the graph we see, that 
+older people's purchase amounts dominantely belong to the first level. And very few old people buy some goods that are in the last range of the purchase amount. 
+
+```{r}
+
+ggplot(data = bf, aes(x=Age, fill=Purchase))+geom_bar(position="fill") + labs(x="Age", y="Purchase") 
+
+```
+
+Purchase amount of males is higher, meaning they are either buying more expensive stuff, 
+or they buy goods in greater quantities. 
+Females' portion of the first level of purchase is bigger than the male's. 
+
+```{r}
+
+ggplot(data = bf, aes(x=Gender, fill=Purchase))+geom_bar(position="fill") + labs(x="Gender", y="Purchase") 
+
+```
+
+People living in cities of class B are spending much more amount of money (1099006-10536783).
+People living in cities of class C dominantely fall under the first level of purchase amount. Meaning, their purchase amounts are more likely to be less.  
+
+```{r}
+
+ggplot(data = bf, aes(x=City_Category, fill=Purchase))+geom_bar(position="fill") + labs(x="City_Category", y="Purchase") 
+
+```
+
+The biggest category in the occupation is 0. There are 688 people, falling in it. There are 517 people falling under occupation "1". The smallest one is "8" with 17 people being in this category. 
+
+```{r}
+occup_dep <- table(bf$Occupation)
+occup_dep
+gender_occup_rel<- table(bf$Gender, black_friday_clean$Occupation)
+gender_occup_rel
+
+ggplot(bf,aes(x=Occupation, fill=Age))+geom_bar()+facet_grid(Gender~Marital_Status)
+
+```
+
+
+In the vizualization above we can see that the number of customers is the most, when they are from C class city and live there for a year. It's interesting to notice that people who live in A class do not buy goods that frequently. 
+
+```{r}
+str(bf)
+ggplot(bf, aes(x=Stay_In_Current_City_Years, fill=City_Category)) + geom_bar() +  labs(x="Stay in Current City Years",y="Number of Customers")
+```
+
+The people who buy some goods the most are males(!) living in C class cities. 
+
+```{r}
+
+ggplot(bf,aes(x=Age,fill=Marital_Status))+geom_bar()+facet_grid(Gender~City_Category)
+
+```
+
+We divide our data into Train and Test sets, to start building the models and make predictions. 
+
+```{r}
+
+set.seed(1)
+sample <- sample(nrow(black_friday_clean), floor(nrow(black_friday_clean) * 0.8))
+Train<- black_friday_clean[sample,]
+Test <- black_friday_clean[-sample,]
+
+```
+
+First we built the Linear Regression model. As User_ID has nothing to do with purchase amount we do not
+count it as an independent variable. 
+We get Adjusted R-squared:  0.961 and p-value: < 2.2e-16. 
+
+```{r}
+
+model1 <- lm(Train$Purchase~.-User_ID, data=Train)
+summary(model1)
+
+```
+
+We do prediction and compute Root Mean Squared Error, which is 180943.2. Then we calculated MAE. 
+RMSE is closer to MAE than to MAE^2, which means that the model many relatively small errors. 
+MAE is 108927.9 in this case. 
+
+```{r}
+library(caret)
+pred1<-predict(model1, newdata = Test)
+RMSE1<-RMSE(Test$Purchase, pred1)
+RMSE1
+MAE1 <- MAE(Test$Purchase, pred1)
+MAE1
+
+accuracy(pred1, Test$Purchase)
+
+```
+
+In the summary of the first model we notice that some variables do not affect purchase amount much, 
+so we drop them from the list of independent variables. 
+For the newly created model the Adjusted R-squared is  0.9609, but RMSE is a bit smaller (180160.8) in this case. MAE is 08113.8. 
+
+```{r}
+
+model2 <- lm(Train$Purchase~.-User_ID-Stay_In_Current_City_Years-Age-Occupation , data=Train)
+summary(model2)
+pred2<-predict(model2, newdata = Test)
+RMSE2<-RMSE(Test$Purchase, pred2)
+RMSE2
+MAE2 <- MAE(Test$Purchase, pred2)
+MAE2
+
+```
+
+The second model does less errors on average, so we conclude the second model is more accurate than the first one. 
+Concerning the range of RMSE: Minimum value for Purchase is 44108, the mean is 851752 and the maximum value is 10536783.
+It is reasonable that we got such kind of numbers for RMSEs. 
+
+
+
+
+Building Decision Trees.
+
+
+For the people whose Product Category 2 was less than 1169, we can notice that the purchase amount is more than for the people whose Product Category 2 was greater than 1169.
+
+```{r}
+
+library(rpart)
+library(rpart.plot)
+train = sample (1:nrow(black_friday_clean), nrow(black_friday_clean)/2)
+set.seed(1)
+my_model<-rpart(Purchase~.,subset=train, data=black_friday_clean)
+rpart.plot(my_model, type = 4)
+
+
+
+```
+
+The output of summary indicates that only one variable(Second product category) was chosen for tree construction.
+
+```{r}
+
+summary(my_model)
+
+```
+
+Now we do prediction on test set and calculate RMSE and MAE. In this case, our RMSE is 253723.2.
+MAE is 158640.1. 
+
+```{r}
+predictions<-predict(my_model,newdata=black_friday_clean[-train,])
+# predictions
+black_test<-black_friday_clean[-train ,"Purchase"]
+# black_test
+{plot(predictions,black_test$Purchase)
+abline(a = 0, b= 1)}
+RMSE_Tree <- RMSE(predictions, black_test$Purchase)
+RMSE_Tree
+MAE_Tree <- MAE(predictions, black_test$Purchase)
+MAE_Tree
+
+```
+
+Random Forest
+
+The variance is explained by 95.5%
+Number of trees is 500.
+Number of variables at each split is 5.
+MAE is 109262. 
+RMSE is 186163.1.
+```{r}
+library(randomForest)
+set.seed(1)
+bag.black <- randomForest(Purchase~.,data=black_friday_clean, subset=train,importance =TRUE)
+
+prediction_forest = predict (bag.black, newdata=black_friday_clean[-train,])
+{plot(prediction_forest, black_test$Purchase)
+abline (0,1)}
+MAE_forest <- MAE(prediction_forest, black_test$Purchase)
+RMSE_forest <- RMSE(prediction_forest, black_test$Purchase)
+MAE_forest
+RMSE_forest
+
+
+```
+
+
+
+
+```{r}
+x = model.matrix(Purchase~., data = black_friday_clean)[,c(-1,-2)]
+y = black_friday_clean$Purchase
+library(glmnet)
+grid = 10^seq(10,-2, length = 100)
+
+ridge.mod = glmnet(x[sample,], y[sample], alpha = 0, lambda = grid,
+                   thresh = 1e-12)
+
+ridge.pred =predict(ridge.mod, s = 4, newx = x[-sample,])
+
+RMSE_ridge <- RMSE(ridge.pred, y[-sample])
+RMSE_ridge
+MAE_ridge <- MAE(ridge.pred, y[-sample])
+
+
+
+```
+
+```{r}
+
+lasso.mod=glmnet(x[sample,],y[sample],alpha=1,lambda=grid)
+plot(lasso.mod)
+set.seed(1)
+cv.out=cv.glmnet(x[sample,],y[sample],alpha=1)
+plot(cv.out)
+bestlam=cv.out$lambda.min
+lasso.pred=predict(lasso.mod,s=bestlam,newx=x[-sample,])
+
+RMSE_lasso <- RMSE(lasso.pred, y[-sample])
+RMSE_lasso
+MAE_lasso <- MAE(lasso.pred, y[-sample])
+MAE_lasso
+```
+
+```{r}
+library(xgboost)
+set.seed(1)
+xgb <- xgboost(x[train,],y[train], max.depth = 10,nrounds = 25)
+
+set.seed(123)
+train = sample(1:nrow(x), nrow(x)/2)
+test = (-train)
+
+dtrain <- xgb.DMatrix(data = x[train,], label = y[train])
+dtest <- xgb.DMatrix(data = x[test,], label = y[test])
+
+dtrain2 <- xgb.DMatrix(data = x[sample,], label = y[sample])
+dtest2 <- xgb.DMatrix(data = x[-sample,], label = y[-sample])
+
+watchlist <- list(train= dtrain, test= dtest)
+
+
+set.seed(1)
+bst2 <- xgb.train(data= dtrain2, max.depth=7, eta=0.4, nrounds=120,watchlist=watchlist,
+                 base_score = 0.012)
+RMSE_xgboost <-88457.843750  
+
+```
+
+
+```{r}
+
+rmse_table <- table(RMSE1, RMSE2, RMSE_forest, RMSE_lasso, RMSE_ridge, RMSE_Tree, RMSE_xgboost)
+rmse <- as.data.frame(rmse_table)
+rmse <- rmse[-c(8)]
+rmse
+# 
+```
