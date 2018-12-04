@@ -3,6 +3,7 @@ title: "Homework 6"
 author: "Kevork Sulahian"
 date: ""
 output:
+   html_document: default
  
 ---
 
@@ -11,26 +12,79 @@ Make the data usable for Association Rules Mining.
 (Hint. You can use function read.transactins)
 plot the data to see what are the first 5 most frequent items
 ```{r}
-data <- read.csv("groceries.csv")
+library(arules)
+library(arulesViz)
+data <- read.transactions("groceries.csv", format = "basket", sep =",")
 
+txn <- as(data, "transactions")
+# inspect(txn)
+
+itemFrequencyPlot(txn, topN=5)
 ```
 
 (5 points) Using appriori algorithm, create the rules by setting the support to be 0.005 and confidence to be 0.1 Set the length of the rules to be 4. Interprete the meaning of support and confidence.
 ```{r}
 
+rules <- apriori(txn, parameter = list(supp = 0.005, conf = 0.1,
+                                       minlen = 4, maxlen = 4))
+
+# supp measures the transaction that contain same object/item ( probability of buying that item)
+# conf measures the probability of an item y being bought given x is bought 
 ```
 
 (7 points) Inspect the first 5 rules. Sort them by support in descending order. Interprete the first 2 rules. What is the meaning of support, comfidence and lift?
 ```{r}
+rules_2 <- rules[1:5]
+inspect(sort(rules_2, by = "support"))
+
+# first
+# support is showing the probability of buying those specific four items which is 0.005 51/ (all other transactions)
+# confidence is showing the probability of getting milk when we have the other 3 -> 0.607
+# lift is showing the probability of getting milk when we have the other 3 while taking in considration
+# the probability of buying those specific four items (support) 2.3 which means that whole milk is likely to be bought based on the previous 3
+
+# second
+# support is showing the probability of buying those specific four items which is 0.005 50/ (all other transactions)
+# confidence is showing the probability of getting milk when we have the other 3 -> 0.61
+# lift is showing the probability of getting milk when we have the other 3 while taking in considration
+# the probability of buying those specific four items (support) 2.4 which means that whole milk is likely to be bought based on the previous 3
+
+
 
 ```
 
 (6 points) Subset the rules to the ones that contaiin only "whole milk" in the right hand side and with confidence more than 60%. What group of products has the highest support?
 ```{r}
+rules3 <-apriori(txn, parameter = list(supp = 0.005, conf = 0.6,
+                                       minlen = 4, maxlen = 4))
+rules_milk <- subset(rules3, rhs %in% "whole milk")
+inspect(sort(rules_milk, by = "support"))
+
+#{other vegetables,root vegetables,yogurt}             => {whole milk}
+#{other vegetables,tropical fruit,yogurt}              => {whole milk} 
+# these two have the highest support with 0.0078 and 0.0076 respectively 
 
 ```
 
 (10 points) Explore the library(arulesViz) and make 3 insightful vizualisations on the data.
+```{r}
+
+# 1 
+plot(rules, method = "graph")
+
+
+
+# 2
+plot(rules, type = "scatterplot", 
+     measure = c("lift", "confidence"), shading = "support", jitter = 0)
+
+
+# 3
+ plot(rules, method = "paracoord", control = list(reorder = TRUE))
+# shows a parallel coordinates plot The width of the arrows represents
+# support and the intensity of the color represent confidence
+```
+
 ```{r}
 
 ```
