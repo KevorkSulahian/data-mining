@@ -1,0 +1,36 @@
+---
+title: "Homework 6"
+author: "Kevork Sulahian"
+date: ""
+output:
+ 
+---
+
+(2 points)Read the file groceries which conntains data about transactions made in the market
+Make the data usable for Association Rules Mining. 
+(Hint. You can use function read.transactins)
+plot the data to see what are the first 5 most frequent items
+```{r}
+data <- read.csv("groceries.csv")
+
+```
+
+(5 points) Using appriori algorithm, create the rules by setting the support to be 0.005 and confidence to be 0.1 Set the length of the rules to be 4. Interprete the meaning of support and confidence.
+```{r}
+
+```
+
+(7 points) Inspect the first 5 rules. Sort them by support in descending order. Interprete the first 2 rules. What is the meaning of support, comfidence and lift?
+```{r}
+
+```
+
+(6 points) Subset the rules to the ones that contaiin only "whole milk" in the right hand side and with confidence more than 60%. What group of products has the highest support?
+```{r}
+
+```
+
+(10 points) Explore the library(arulesViz) and make 3 insightful vizualisations on the data.
+```{r}
+
+```
