@@ -58,6 +58,12 @@ plot(rules, type = "scatterplot")
 
 plot(rules1[10:30], method = "graph")
 
+<<<<<<< HEAD
+=======
+plot(rules1, type = "scatterplot", 
+     measure = c("lift", "confidence"), shading = "support", jitter = 0)
+
+>>>>>>> bc3f5787805456db87458518fece9da35f41b41b
 # httr
 # rJava
 # curl
