@@ -14,9 +14,12 @@ Purchase is the dependent variable since that is what we want to predict later t
 ```{r}
 
 black_friday <-read.csv("BlackFriday.csv")
+<<<<<<< HEAD
 
 summary(black_friday$Purchase)
 
+=======
+>>>>>>> bc3f5787805456db87458518fece9da35f41b41b
 summary(black_friday)
 str(black_friday)
 
@@ -312,10 +315,17 @@ MAE_ridge <- MAE(ridge.pred, y[-sample])
 
 ```{r}
 
+<<<<<<< HEAD
 lasso.mod=glmnet(x[sample,],y[sample],alpha=0.9,lambda=grid)
 plot(lasso.mod)
 set.seed(1)
 cv.out=cv.glmnet(x[sample,],y[sample],alpha=0.9)
+=======
+lasso.mod=glmnet(x[sample,],y[sample],alpha=1,lambda=grid)
+plot(lasso.mod)
+set.seed(1)
+cv.out=cv.glmnet(x[sample,],y[sample],alpha=1)
+>>>>>>> bc3f5787805456db87458518fece9da35f41b41b
 plot(cv.out)
 bestlam=cv.out$lambda.min
 lasso.pred=predict(lasso.mod,s=bestlam,newx=x[-sample,])
